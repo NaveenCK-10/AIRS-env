@@ -1,0 +1,28 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+.venv_bad/
+
+# Build / packaging
+*.egg-info/
+dist/
+build/
+
+# OS / misc
+.DS_Store
+Thumbs.db
+
+# Binaries (critical for HF)
+*.exe
+*.dll
+*.so
+
+# Logs
+*.log

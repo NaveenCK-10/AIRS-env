@@ -1,0 +1,23 @@
+[project]
+name = "airs-env"
+version = "1.0.0"
+description = "Autonomous Incident Response Simulator"
+authors = [{ name = "Naveen" }]
+requires-python = ">=3.10"
+
+dependencies = [
+"fastapi",
+"uvicorn",
+"pydantic",
+"openenv-core>=0.2.0"
+]
+
+[project.scripts]
+server = "api.main:main"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["api", "core", "baseline", "evaluation", "configs", "data"]

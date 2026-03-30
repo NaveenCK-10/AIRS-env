@@ -1,0 +1,184 @@
+[
+  {
+    "id": "INC100",
+    "difficulty": "easy",
+    "alert": "High latency detected",
+    "logs": [
+      "DB connection timeout",
+      "Retry failed"
+    ],
+    "system_status": {
+      "api": "degraded",
+      "database": "down",
+      "cache": "healthy"
+    },
+    "expected": {
+      "diagnosis": "database_failure",
+      "action": "restart_database"
+    }
+  },
+  {
+    "id": "INC101",
+    "difficulty": "easy",
+    "alert": "API returning 500 errors",
+    "logs": [
+      "500 internal server error",
+      "Null pointer exception"
+    ],
+    "system_status": {
+      "api": "down",
+      "database": "healthy",
+      "cache": "healthy"
+    },
+    "expected": {
+      "diagnosis": "api_crash",
+      "action": "restart_api"
+    }
+  },
+  {
+    "id": "INC102",
+    "difficulty": "medium",
+    "alert": "Slow responses observed",
+    "logs": [
+      "Cache miss rate high",
+      "DB query latency elevated"
+    ],
+    "system_status": {
+      "api": "degraded",
+      "database": "slow",
+      "cache": "overloaded"
+    },
+    "expected": {
+      "diagnosis": "cache_overload",
+      "action": "scale_cache"
+    }
+  },
+  {
+    "id": "INC103",
+    "difficulty": "medium",
+    "alert": "Database unreachable",
+    "logs": [
+      "connection refused",
+      "timeout error"
+    ],
+    "system_status": {
+      "api": "degraded",
+      "database": "down",
+      "cache": "healthy"
+    },
+    "expected": {
+      "diagnosis": "database_failure",
+      "action": "restart_database"
+    }
+  },
+  {
+    "id": "INC104",
+    "difficulty": "hard",
+    "alert": "Cascading failures detected",
+    "logs": [
+      "DB timeout",
+      "API retry storm",
+      "Cache miss 90%"
+    ],
+    "system_status": {
+      "api": "down",
+      "database": "slow",
+      "cache": "overloaded"
+    },
+    "expected": {
+      "diagnosis": "cache_overload",
+      "action": "scale_cache"
+    }
+  },
+  {
+    "id": "INC105",
+    "difficulty": "easy",
+    "alert": "API latency spike",
+    "logs": [
+      "thread pool exhausted",
+      "queue backlog high"
+    ],
+    "system_status": {
+      "api": "degraded",
+      "database": "healthy",
+      "cache": "healthy"
+    },
+    "expected": {
+      "diagnosis": "api_overload",
+      "action": "restart_api"
+    }
+  },
+  {
+    "id": "INC106",
+    "difficulty": "medium",
+    "alert": "Cache server overloaded",
+    "logs": [
+      "evictions high",
+      "memory pressure"
+    ],
+    "system_status": {
+      "api": "slow",
+      "database": "healthy",
+      "cache": "overloaded"
+    },
+    "expected": {
+      "diagnosis": "cache_overload",
+      "action": "scale_cache"
+    }
+  },
+  {
+    "id": "INC107",
+    "difficulty": "hard",
+    "alert": "Mixed service degradation",
+    "logs": [
+      "db slow queries",
+      "api 5xx",
+      "cache misses"
+    ],
+    "system_status": {
+      "api": "degraded",
+      "database": "slow",
+      "cache": "overloaded"
+    },
+    "expected": {
+      "diagnosis": "cache_overload",
+      "action": "scale_cache"
+    }
+  },
+  {
+    "id": "INC108",
+    "difficulty": "medium",
+    "alert": "Intermittent DB failures",
+    "logs": [
+      "timeout sporadic",
+      "connection reset"
+    ],
+    "system_status": {
+      "api": "degraded",
+      "database": "slow",
+      "cache": "healthy"
+    },
+    "expected": {
+      "diagnosis": "database_failure",
+      "action": "restart_database"
+    }
+  },
+  {
+    "id": "INC109",
+    "difficulty": "easy",
+    "alert": "Service unhealthy",
+    "logs": [
+      "health check failed",
+      "service crash detected"
+    ],
+    "system_status": {
+      "api": "down",
+      "database": "healthy",
+      "cache": "healthy"
+    },
+    "expected": {
+      "diagnosis": "api_crash",
+      "action": "restart_api"
+    }
+  }
+]
