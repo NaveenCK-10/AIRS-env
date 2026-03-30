@@ -31,9 +31,9 @@ class AIRSEnv:
         self.steps += 1
 
         # Normalize inputs (robustness)
-        diagnosis = str(action.get("diagnosis", "")).lower()
+        diagnosis = str(action.get("diagnosis") or "unknown").lower()
         act = str(action.get("action", "")).lower()
-        reason = str(action.get("reason", ""))
+        reason = str(action.get("reason") or "no reason provided")
 
         action = {
             "diagnosis": diagnosis,
@@ -148,8 +148,14 @@ class AIRSEnv:
         return round(score, 2)
 
     def state(self) -> Dict[str, Any]:
-        return {
-            "incident_id": self.current["id"] if self.current else None,
-            "system_status": self.simulator.state if self.simulator else None,
-            "step": self.steps
-        }
+        if not self.initialized:
+            return {
+                "incident_id": None,
+                "alert": "Environment not initialized",
+                "logs": [],
+                "system_status": {},
+                "step": 0,
+                "version": self.VERSION,
+                "hint": "Call /reset to start"
+            }
+        return self._get_obs(include_hint=True)

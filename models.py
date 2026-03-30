@@ -12,9 +12,9 @@ class Observation(BaseModel):
     hint: Optional[str] = None
 
 class Action(BaseModel):
-    diagnosis: str
+    diagnosis: Optional[str] = None
     action: str
-    reason: str
+    reason: Optional[str] = ""
 
 class StepResponse(BaseModel):
     observation: Observation

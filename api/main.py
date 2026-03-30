@@ -19,7 +19,11 @@ env = AIRSEnv()
 
 @app.get("/")
 def root():
-    return {"status": "ok", "service": "AIRS running"}
+    return {
+        "status": "ok",
+        "message": "AIRS OpenEnv running",
+        "docs": "/docs"
+    }
 
 @app.api_route("/reset", methods=["GET", "POST"], response_model=Observation)
 def reset():
