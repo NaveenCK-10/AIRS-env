@@ -15,7 +15,7 @@ app = FastAPI(
     openapi_url="/openapi.json"
 )
 
-env = AIRSEnv()
+env = None
 
 @app.get("/")
 def root():
@@ -27,10 +27,17 @@ def root():
 
 @app.api_route("/reset", methods=["GET", "POST"], response_model=Observation)
 def reset():
+    global env
+    env = AIRSEnv()
     return env.reset()
 
 @app.post("/step", response_model=StepResponse)
 def step(action: Action):
+    global env
+
+    if env is None:
+        raise HTTPException(status_code=400, detail="Call /reset first.")
+
     try:
         obs, reward, done, info = env.step(action.model_dump())
     except ValueError as e:
@@ -45,6 +52,8 @@ def step(action: Action):
 
 @app.get("/state", response_model=Dict[str, Any])
 def state() -> Dict[str, Any]:
+    if env is None:
+        raise HTTPException(status_code=400, detail="Call /reset first.")
     return env.state()
 
 @app.get("/tasks", response_model=List[Dict[str, str]])
@@ -53,7 +62,7 @@ def tasks() -> List[Dict[str, str]]:
 
 @app.post("/grader", response_model=Dict[str, float])
 def grader(pred: GradeRequest) -> Dict[str, float]:
-    if env.current is None:
+    if env is None or env.current is None:
         raise HTTPException(status_code=400, detail="Call /reset first.")
 
     expected = env.current["expected"]
