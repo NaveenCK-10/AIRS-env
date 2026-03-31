@@ -1,0 +1,8 @@
+ Volume in drive C is OS
+ Volume Serial Number is 5C7D-9576
+
+ Directory of C:\Users\navee\Downloads\airs-env-v1-final\server
+
+
+ Directory of C:\Users\navee\Downloads\airs-env-v1-final
+
