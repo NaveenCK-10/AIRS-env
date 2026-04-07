@@ -1,4 +1,3 @@
-import json
 import sys
 from core.environment import AIRSEnv
 
@@ -63,35 +62,35 @@ def predict(obs):
     }
 
 
-def run_task(difficulty):
-    """Run a single task episode and return the cumulative reward."""
-    env = AIRSEnv()
-
-    # Advance env.idx to the first incident matching the requested difficulty
-    for i, incident in enumerate(env.data):
-        if incident.get("difficulty") == difficulty:
-            env.idx = i
-            break
-
-    obs = env.reset()
-    last_score = 0.0
-
-    for _ in range(env.max_steps):
-        action = predict(obs)
-        obs, reward, done, info = env.step(action)
-        last_score = reward["score"]
-        if done:
-            break
-
-    return round(last_score, 2)
-
-
 def main():
-    scores = {}
-    for difficulty in ("easy", "medium", "hard"):
-        scores[difficulty] = run_task(difficulty)
-    print(json.dumps(scores))
+    for task in ["easy", "medium", "hard"]:
+        print(f"[START] task={task}", flush=True)
+
+        env = AIRSEnv()
+
+        # Advance env.idx to the first incident matching the requested difficulty
+        for i, incident in enumerate(env.data):
+            if incident.get("difficulty") == task:
+                env.idx = i
+                break
+
+        obs = env.reset()
+        done = False
+        step_count = 0
+        reward = {"score": 0.0}
+
+        while not done:
+            step_count += 1
+            action = predict(obs)
+            obs, reward, done, info = env.step(action)
+            print(f"[STEP] step={step_count} reward={reward['score']}", flush=True)
+
+            if step_count >= env.max_steps:
+                break
+
+        print(f"[END] task={task} score={reward['score']} steps={step_count}", flush=True)
 
 
 if __name__ == "__main__":
     main()
+
