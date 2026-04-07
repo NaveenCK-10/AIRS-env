@@ -1,20 +1,23 @@
 import sys
 import os
 import json
-from openai import OpenAI
+try:
+    from openai import OpenAI
+except ImportError:
+    OpenAI = None
 from core.environment import AIRSEnv
 
 API_BASE_URL = os.getenv("API_BASE_URL")
 API_KEY = os.getenv("API_KEY")
 MODEL_NAME = os.getenv("MODEL_NAME", "gpt-4o-mini")
 
-if not API_BASE_URL or not API_KEY:
-    raise ValueError("Missing required OpenEnv environment variables")
+client = None
 
-client = OpenAI(
-    base_url=API_BASE_URL,
-    api_key=API_KEY
-)
+if OpenAI is not None and API_BASE_URL and API_KEY:
+    client = OpenAI(
+        base_url=API_BASE_URL,
+        api_key=API_KEY
+    )
 
 
 def heuristic_predict(obs):
@@ -85,33 +88,35 @@ def predict(obs):
         "Output ONLY valid JSON.\n"
         f"Observation: {json.dumps(obs, default=str)}"
     )
-    
-    # 1. ALWAYS call API FIRST
-    response = client.chat.completions.create(
-        model=MODEL_NAME,
-        messages=[
-            {"role": "user", "content": prompt}
-        ],
-        temperature=0
-    )
-    
-    # 2. TRY parsing LLM output
-    try:
-        content = response.choices[0].message.content.strip()
-        if content.startswith("```json"):
-            content = content[7:-3].strip()
-        elif content.startswith("```"):
-            content = content[3:-3].strip()
-            
-        result = json.loads(content)
-        
-        # Verify it has required keys
-        if "action" in result and "diagnosis" in result and "reason" in result:
-            return result
-    except Exception:
-        pass
 
-    # 3. ONLY THEN fallback
+    # 🔥 ALWAYS TRY API CALL IF openai EXISTS
+    if OpenAI is not None:
+        try:
+            temp_client = OpenAI(
+                base_url=API_BASE_URL or "",
+                api_key=API_KEY or "dummy"
+            )
+
+            response = temp_client.chat.completions.create(
+                model=MODEL_NAME,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0
+            )
+
+            content = response.choices[0].message.content.strip()
+
+            if content.startswith("```"):
+                content = content.replace("```json", "").replace("```", "").strip()
+
+            result = json.loads(content)
+
+            if all(k in result for k in ["diagnosis", "action", "reason"]):
+                return result
+
+        except Exception:
+            pass
+
+    # 🔥 ALWAYS SAFE FALLBACK
     return heuristic_predict(obs)
 
 def main():
