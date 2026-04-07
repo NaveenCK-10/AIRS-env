@@ -1,5 +1,10 @@
 import sys
+import os
 from core.environment import AIRSEnv
+
+API_BASE_URL = os.getenv("API_BASE_URL", "https://naveenck10-airs-env.hf.space")
+MODEL_NAME = os.getenv("MODEL_NAME", "dummy-model")
+HF_TOKEN = os.getenv("HF_TOKEN")
 
 
 def predict(obs):
