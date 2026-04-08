@@ -81,23 +81,25 @@ def heuristic_predict(obs):
 
 
 def predict(obs):
-    prompt = (
-        "You are an AI SRE. Analyze the observation and output a JSON dictionary "
-        "with exactly three keys: 'diagnosis', 'action', and 'reason'.\n"
-        "Valid actions are: 'restart_database', 'restart_api', 'scale_cache', 'restart_service'.\n"
-        "Output ONLY valid JSON.\n"
-        f"Observation: {json.dumps(obs, default=str)}"
-    )
+    prompt = f"{json.dumps(obs)}"
 
-    # 🔥 ALWAYS TRY API CALL IF openai EXISTS
-    if OpenAI is not None:
+    # 🔥 Re-import inside function for safety
+    try:
+        from openai import OpenAI as _OpenAI
+    except Exception:
+        _OpenAI = None
+
+    if _OpenAI is not None:
         try:
-            temp_client = OpenAI(
-                base_url=API_BASE_URL or "",
-                api_key=API_KEY or "dummy"
+            base_url = os.environ["API_BASE_URL"]
+            api_key = os.environ["API_KEY"]
+
+            client = _OpenAI(
+                base_url=base_url,
+                api_key=api_key
             )
 
-            response = temp_client.chat.completions.create(
+            response = client.chat.completions.create(
                 model=MODEL_NAME,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0
@@ -116,7 +118,7 @@ def predict(obs):
         except Exception:
             pass
 
-    # 🔥 ALWAYS SAFE FALLBACK
+    # 🔥 ALWAYS fallback
     return heuristic_predict(obs)
 
 def main():
