@@ -7,210 +7,325 @@ sdk: docker
 app_port: 7860
 pinned: false
 ---
-# AIRS OpenEnv: Autonomous Incident Response Simulator
 
-An OpenEnv-compatible FastAPI environment for training and evaluating AI agents on realistic production incident response.
+# 🚀 AIRS OpenEnv: Autonomous Incident Response Simulator
 
-Built for hackathon judging: fast to run, easy to inspect, and designed to demonstrate multi-step decision quality, not just one-shot classification.
+A production-grade OpenEnv environment that simulates **real-world incident response**, where AI agents must diagnose failures, take actions, and recover systems **step-by-step**.
 
----
-
-## 🚀 Problem Statement
-
-Modern systems fail in complex ways: API crashes, database outages, cache overloads, and cascading degradation. Teams need AI agents that can:
-
-* Read noisy telemetry and logs
-* Diagnose root cause accurately
-* Choose effective remediation actions
-* Explain decisions under time pressure
-
-Most benchmarks test isolated predictions. Real incident operations require **stateful, sequential actions with measurable outcomes**.
+Built for hackathon evaluation — fast, deterministic, and designed to test **sequential decision-making**, not just one-shot predictions.
 
 ---
 
-## 🧠 Why This Is Unique
+## ⚡ 30-Second Demo (What This Actually Does)
 
-* Stateful incident simulation: actions modify system health over time
-* Multi-objective reward system
-* Partial credit + penalties (not binary scoring)
-* Deterministic external grader
-* Task ladder (easy → medium → hard)
+### 🧪 Example Incident
+
+**Logs:**
+- "Database connection timeout"
+- "API latency spiking"
+- "Service returning 500 errors"
+
+**System Status:**
+- database: degraded  
+- api: slow  
+- cache: healthy  
+
+---
+
+### 🤖 Agent Decision
+
+- **Diagnosis:** `database_failure`  
+- **Action:** `restart_database`  
+- **Reason:** Database instability is causing cascading API failures  
+
+---
+
+### ✅ Result
+
+- System stabilizes  
+- API latency returns to normal  
+- Reward increases  
+
+💡 This demonstrates **multi-step reasoning under real conditions**, not simple classification.
+
+---
+
+## 🎯 Problem Statement
+
+Modern production systems fail in complex, interconnected ways:
+
+- API crashes  
+- Database outages  
+- Cache overloads  
+- Cascading failures  
+
+AI agents must:
+
+- Interpret noisy logs  
+- Identify root causes  
+- Take corrective actions  
+- Justify decisions  
+
+👉 Most benchmarks test **isolated predictions**  
+👉 AIRS tests **real-world decision workflows**
+
+---
+
+## 🧠 Why AIRS Stands Out
+
+- Stateful incident simulation (actions change system behavior)
+- Evaluates **decision sequences**, not single outputs
+- Multi-objective reward system
+- Partial credit + penalties
+- Deterministic external grader
+- Mimics real **SRE (Site Reliability Engineering)** workflows
+- Task ladder: easy → medium → hard
 
 ---
 
 ## 🏗️ Architecture Overview
 
-```
-Agent
-   -> POST /step (diagnosis, action, reason)
-FastAPI API Layer (api/app.py)
-   -> AIRSEnv (core/environment.py)
-        -> SystemSimulator (core/simulator.py)
-        -> Reward Computation
-   -> Observation + Reward + Done + Info
+Agent → POST /step (diagnosis, action, reason)
 
-Dataset: data/incidents_v1.json
-Evaluator: evaluation/grader.py
-Baseline: baseline/run.py
-```
+FastAPI API Layer (api/main.py) → AIRSEnv (core/environment.py) → SystemSimulator (core/simulator.py) → Reward Engine
+
+→ Returns: Observation + Reward + Done + Info
+
+Dataset: data/incidents_v1.json Evaluator: evaluation/grader.py Baseline: inference.py
 
 ---
 
 ## ⚙️ Core Flow
 
-1. `GET /reset` → loads a random incident
-2. `POST /step` → agent takes action
-3. Simulator updates system state
-4. Reward reflects decision quality
-5. Episode ends on resolution or max steps
+1. `GET /reset` → Start new incident  
+2. `POST /step` → Agent takes action  
+3. Environment updates system state  
+4. Reward computed based on decision quality  
+5. Repeat until resolved or max steps  
 
 ---
 
-## 🧾 Action Space
+## 🧪 Quick Example (API Usage)
 
-`POST /step` accepts:
-
-* `diagnosis` (string): predicted root cause (e.g. `database_failure`, `api_crash`, `cache_overload`)
-* `action` (string): remediation action (e.g. `restart_database`, `restart_api`, `scale_cache`, `restart_service`)
-* `reason` (string): explanation of why the action is appropriate
-
----
-
-## 👀 Observation Space
-
-`GET /reset` and `POST /step` return observation fields:
-
-* `incident_id` (string)
-* `alert` (string)
-* `logs` (list of strings)
-* `system_status` (object mapping service -> status)
-* `step` (integer)
-* `version` (string)
-* `hint` (optional string)
-
----
-
-## 🎯 Task Design
-
-* **Easy:** Single-service failures
-* **Medium:** Mixed symptoms
-* **Hard:** Cascading multi-service failures
-
-Accessible via:
-
-```
-GET /tasks
-```
-
----
-
-## 🧪 Reward Function
-
-The reward combines:
-
-* Diagnosis accuracy (exact + partial match)
-* Action correctness
-* Reasoning quality
-* Step efficiency
-* Penalties for poor actions
-
----
-
-## 🔌 API Endpoints
-
-* `GET /reset` → start new episode
-* `POST /step` → take action
-* `GET /state` → inspect system
-* `GET /tasks` → task definitions
-* `POST /grader` → deterministic scoring
-* `GET /baseline` → heuristic baseline
-
----
-
-## 🧪 Try it Live
-
-👉 Open API Docs:
-
-```
-/docs
-```
-
-Example:
-
-```
-https://huggingface.co/spaces/Naveenck10/airs-env
-```
-
----
-
-## 💻 Local Setup
-
+### Step 1: Reset Environment
 ```bash
+curl -X GET https://naveenck10-airs-env.hf.space/reset
+
+Step 2: Take Action
+
+curl -X POST https://naveenck10-airs-env.hf.space/step \
+  -H "Content-Type: application/json" \
+  -d '{
+    "diagnosis": "database_failure",
+    "action": "restart_database",
+    "reason": "DB causing cascading failures"
+  }'
+
+
+---
+
+🧾 Action Space
+
+POST /step
+
+Field	Description
+
+diagnosis	Root cause prediction
+action	Remediation action
+reason	Explanation
+
+
+Supported Actions:
+
+restart_database
+
+restart_api
+
+scale_cache
+
+restart_service
+
+
+
+---
+
+👀 Observation Space
+
+Returned by /reset and /step:
+
+incident_id
+
+alert
+
+logs
+
+system_status
+
+step
+
+version
+
+hint (optional)
+
+
+
+---
+
+🎯 Task Design
+
+Level	Description
+
+Easy	Single-service failure
+Medium	Mixed signals
+Hard	Cascading multi-service failures
+
+
+👉 Access via:
+
+GET /tasks
+
+
+---
+
+🧪 Reward System
+
+The reward reflects:
+
+Diagnosis accuracy
+
+Action correctness
+
+Reason quality
+
+Step efficiency
+
+Penalties for poor decisions
+
+
+👉 Encourages correct AND efficient reasoning
+
+
+---
+
+📊 Baseline Performance
+
+The provided baseline achieves:
+
+Easy: ~0.72
+
+Medium: ~0.04
+
+Hard: ~0.04
+
+
+This highlights increasing difficulty and need for stronger reasoning strategies.
+
+
+---
+
+🔌 API Endpoints
+
+Endpoint	Purpose
+
+GET /reset	Start episode
+POST /step	Take action
+GET /state	Current system
+GET /tasks	Task list
+POST /grader	Deterministic scoring
+GET /baseline	Baseline scores
+
+
+
+---
+
+🧪 Live Demo
+
+👉 API Docs:
+
+https://naveenck10-airs-env.hf.space/docs
+
+👉 Base URL:
+
+https://naveenck10-airs-env.hf.space
+
+
+---
+
+💻 Local Setup
+
 pip install -r requirements.txt
-uvicorn api.app:app --reload
-```
+uvicorn api.main:app --reload
 
 Open:
 
-```
 http://127.0.0.1:8000/docs
-```
 
-## Live Demo
-
-* Live API Docs: https://naveenck10-airs-env.hf.space/docs
-* Base URL: https://naveenck10-airs-env.hf.space
 
 ---
 
-## 🐳 Docker Setup
+🐳 Docker Setup
 
-```bash
 docker build -t airs-env .
 docker run -p 7860:7860 airs-env
-```
 
 Open:
 
-```
 http://127.0.0.1:7860/docs
-```
+
 
 ---
 
-## 🧩 OpenEnv Configuration
+🧩 OpenEnv Configuration
 
 Defined in:
 
-```
 configs/openenv.yaml
-```
+
 
 ---
 
-## 🌍 Why This Matters
+⚠️ Limitations
 
-* Simulates real-world incident response
-* Enables agent-based decision evaluation
-* Encourages explainable AI actions
-* Bridges gap between theory and production systems
+Baseline uses heuristic logic (not learned policy)
+
+Complex cascading failures remain challenging
+
+Future work: integrate RL / LLM-based agents
+
+
 
 ---
 
-## 🏆 Hackathon Value
+🌍 Real-World Impact
+
+AIRS enables:
+
+AI-driven incident response training
+
+Evaluation of reasoning under pressure
+
+Explainable system recovery decisions
+
+Simulation of real production failures
+
+
+
+---
+
+🏆 Hackathon Strength
 
 This project demonstrates:
 
-* Multi-step AI reasoning
-* Realistic system simulation
-* Strong backend engineering
-* Practical AI evaluation framework
+Multi-step AI reasoning
+
+Realistic system simulation
+
+Clean backend architecture
+
+OpenEnv compliance
+
+Deterministic evaluation pipeline
+
+
 
 ---
-
-## 📌 Status
-
-✅ Fully functional
-✅ API deployed
-✅ Ready for evaluation
-Last updated: rebuild trigger
