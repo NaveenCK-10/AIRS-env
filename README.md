@@ -85,13 +85,25 @@ AI agents must:
 
 ## 🏗️ Architecture Overview
 
+```
+
 Agent → POST /step (diagnosis, action, reason)
 
-FastAPI API Layer (api/main.py) → AIRSEnv (core/environment.py) → SystemSimulator (core/simulator.py) → Reward Engine
+FastAPI API Layer (api/main.py)
+↓
+AIRSEnv (core/environment.py)
+↓
+SystemSimulator (core/simulator.py)
+↓
+Reward Engine
 
 → Returns: Observation + Reward + Done + Info
 
-Dataset: data/incidents_v1.json Evaluator: evaluation/grader.py Baseline: inference.py
+Dataset: data/incidents_v1.json
+Evaluator: evaluation/grader.py
+Baseline: inference.py
+
+````
 
 ---
 
@@ -108,11 +120,16 @@ Dataset: data/incidents_v1.json Evaluator: evaluation/grader.py Baseline: infere
 ## 🧪 Quick Example (API Usage)
 
 ### Step 1: Reset Environment
+
 ```bash
 curl -X GET https://naveenck10-airs-env.hf.space/reset
+````
 
-Step 2: Take Action
+---
 
+### Step 2: Take Action
+
+```bash
 curl -X POST https://naveenck10-airs-env.hf.space/step \
   -H "Content-Type: application/json" \
   -d '{
@@ -120,212 +137,175 @@ curl -X POST https://naveenck10-airs-env.hf.space/step \
     "action": "restart_database",
     "reason": "DB causing cascading failures"
   }'
-
-
----
-
-🧾 Action Space
-
-POST /step
-
-Field	Description
-
-diagnosis	Root cause prediction
-action	Remediation action
-reason	Explanation
-
-
-Supported Actions:
-
-restart_database
-
-restart_api
-
-scale_cache
-
-restart_service
-
-
+```
 
 ---
 
-👀 Observation Space
+## 🧾 Action Space
 
-Returned by /reset and /step:
+**POST /step**
 
-incident_id
+| Field     | Description           |
+| --------- | --------------------- |
+| diagnosis | Root cause prediction |
+| action    | Remediation action    |
+| reason    | Explanation           |
 
-alert
+**Supported Actions:**
 
-logs
-
-system_status
-
-step
-
-version
-
-hint (optional)
-
-
+* restart_database
+* restart_api
+* scale_cache
+* restart_service
 
 ---
 
-🎯 Task Design
+## 👀 Observation Space
 
-Level	Description
+Returned by `/reset` and `/step`:
 
-Easy	Single-service failure
-Medium	Mixed signals
-Hard	Cascading multi-service failures
+* incident_id
+* alert
+* logs
+* system_status
+* step
+* version
+* hint (optional)
 
+---
+
+## 🎯 Task Design
+
+| Level  | Description                      |
+| ------ | -------------------------------- |
+| Easy   | Single-service failure           |
+| Medium | Mixed signals                    |
+| Hard   | Cascading multi-service failures |
 
 👉 Access via:
 
+```
 GET /tasks
-
+```
 
 ---
 
-🧪 Reward System
+## 🧪 Reward System
 
 The reward reflects:
 
-Diagnosis accuracy
-
-Action correctness
-
-Reason quality
-
-Step efficiency
-
-Penalties for poor decisions
-
+* Diagnosis accuracy
+* Action correctness
+* Reason quality
+* Step efficiency
+* Penalties for poor decisions
 
 👉 Encourages correct AND efficient reasoning
 
-
 ---
 
-📊 Baseline Performance
+## 📊 Baseline Performance
 
 The provided baseline achieves:
 
-Easy: ~0.72
+* Easy: ~0.72
+* Medium: ~0.04
+* Hard: ~0.04
 
-Medium: ~0.04
-
-Hard: ~0.04
-
-
-This highlights increasing difficulty and need for stronger reasoning strategies.
-
+This highlights increasing difficulty and the need for stronger reasoning strategies.
 
 ---
 
-🔌 API Endpoints
+## 🔌 API Endpoints
 
-Endpoint	Purpose
-
-GET /reset	Start episode
-POST /step	Take action
-GET /state	Current system
-GET /tasks	Task list
-POST /grader	Deterministic scoring
-GET /baseline	Baseline scores
-
-
+| Endpoint      | Purpose               |
+| ------------- | --------------------- |
+| GET /reset    | Start episode         |
+| POST /step    | Take action           |
+| GET /state    | Current system        |
+| GET /tasks    | Task list             |
+| POST /grader  | Deterministic scoring |
+| GET /baseline | Baseline scores       |
 
 ---
 
-🧪 Live Demo
+## 🧪 Live Demo
 
 👉 API Docs:
-
-https://naveenck10-airs-env.hf.space/docs
+[https://naveenck10-airs-env.hf.space/docs](https://naveenck10-airs-env.hf.space/docs)
 
 👉 Base URL:
-
-https://naveenck10-airs-env.hf.space
-
+[https://naveenck10-airs-env.hf.space](https://naveenck10-airs-env.hf.space)
 
 ---
 
-💻 Local Setup
+## 💻 Local Setup
 
+```bash
 pip install -r requirements.txt
 uvicorn api.main:app --reload
+```
 
 Open:
 
+```
 http://127.0.0.1:8000/docs
-
+```
 
 ---
 
-🐳 Docker Setup
+## 🐳 Docker Setup
 
+```bash
 docker build -t airs-env .
 docker run -p 7860:7860 airs-env
+```
 
 Open:
 
+```
 http://127.0.0.1:7860/docs
-
+```
 
 ---
 
-🧩 OpenEnv Configuration
+## 🧩 OpenEnv Configuration
 
 Defined in:
 
+```
 configs/openenv.yaml
-
-
----
-
-⚠️ Limitations
-
-Baseline uses heuristic logic (not learned policy)
-
-Complex cascading failures remain challenging
-
-Future work: integrate RL / LLM-based agents
-
-
+```
 
 ---
 
-🌍 Real-World Impact
+## ⚠️ Limitations
+
+* Baseline uses heuristic logic (not learned policy)
+* Complex cascading failures remain challenging
+* Future work: integrate RL / LLM-based agents
+
+---
+
+## 🌍 Real-World Impact
 
 AIRS enables:
 
-AI-driven incident response training
-
-Evaluation of reasoning under pressure
-
-Explainable system recovery decisions
-
-Simulation of real production failures
-
-
+* AI-driven incident response training
+* Evaluation of reasoning under pressure
+* Explainable system recovery decisions
+* Simulation of real production failures
 
 ---
 
-🏆 Hackathon Strength
+## 🏆 Hackathon Strength
 
 This project demonstrates:
 
-Multi-step AI reasoning
-
-Realistic system simulation
-
-Clean backend architecture
-
-OpenEnv compliance
-
-Deterministic evaluation pipeline
-
-
+* Multi-step AI reasoning
+* Realistic system simulation
+* Clean backend architecture
+* OpenEnv compliance
+* Deterministic evaluation pipeline
 
 ---
