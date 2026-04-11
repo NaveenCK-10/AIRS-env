@@ -27,8 +27,5 @@ Thumbs.db
 # Logs
 *.log
 
-# Lock files
-uv.lock
-
 # Temporary files
 tmp_*.py
