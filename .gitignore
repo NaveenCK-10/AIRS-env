@@ -19,7 +19,7 @@ build/
 .DS_Store
 Thumbs.db
 
-# Binaries (critical for HF)
+# Binaries
 *.exe
 *.dll
 *.so
@@ -27,9 +27,8 @@ Thumbs.db
 # Logs
 *.log
 
-.venv/
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.egg-info/
+# Lock files
+uv.lock
+
+# Temporary files
+tmp_*.py

@@ -208,9 +208,10 @@ The reward reflects:
 
 The provided baseline achieves:
 
-* Easy: ~0.72
-* Medium: ~0.04
-* Hard: ~0.04
+* Easy: ~0.95
+* Medium: ~0.15
+* Hard: ~0.15
+* Average: ~0.42
 
 This highlights increasing difficulty and the need for stronger reasoning strategies.
 
@@ -274,7 +275,7 @@ http://127.0.0.1:7860/docs
 Defined in:
 
 ```
-configs/openenv.yaml
+openenv.yaml
 ```
 
 ---
