@@ -56,8 +56,8 @@ def state() -> Dict[str, Any]:
         raise HTTPException(status_code=400, detail="Call /reset first.")
     return env.state()
 
-@app.get("/tasks", response_model=List[Dict[str, str]])
-def tasks() -> List[Dict[str, str]]:
+@app.get("/tasks", response_model=List[Dict[str, Any]])
+def tasks() -> List[Dict[str, Any]]:
     return TASKS
 
 @app.post("/grader", response_model=Dict[str, float])
