@@ -10,6 +10,8 @@ pinned: false
 
 # 🚨 AIRS — Autonomous Incident Response Simulator
 
+> 👉 **[Live Demo →](https://naveenck10-airs-env.hf.space/docs)**
+
 > **Every major cloud outage starts the same way: cascading alerts, conflicting signals, and an engineer who has seconds to find the root cause.**
 >
 > AIRS turns that problem into a benchmark. Your AI agent gets the same noisy logs, degraded dashboards, and time pressure a real SRE faces at 3 AM — and has to *reason* its way to recovery.
@@ -42,7 +44,23 @@ Production incident response is one of the **hardest real-world reasoning proble
 | Wrong actions have **consequences** | No penalty for bad answers | AIRS penalizes incorrect actions and late failures |
 | Reasoning must be **explainable** | Only final answer matters | AIRS scores the quality of agent explanations |
 
+Most AI benchmarks test **what** the agent knows. AIRS tests **how** it thinks.
+
 **If you're building AI agents for DevOps, SRE automation, or incident response — this is the evaluation environment you need.**
+
+---
+
+## 🧠 Why AIRS Is Unique
+
+| Feature | AIRS | Typical Benchmark |
+|---|---|---|
+| **Stateful simulation** | ✅ Actions change system state | ❌ Static input/output |
+| **Multi-step episodes** | ✅ Up to 5 steps per incident | ❌ Single prediction |
+| **Partial credit** | ✅ Rewards diagnosis, action, and reasoning separately | ❌ Binary correct/wrong |
+| **Penalties** | ✅ Bad actions and late failures are penalized | ❌ No consequence for errors |
+| **Difficulty ladder** | ✅ Easy → Medium → Hard with increasing ambiguity | ❌ Flat difficulty |
+| **Deterministic grader** | ✅ Reproducible scores, external evaluator | ❌ Subjective evaluation |
+| **Explainable decisions** | ✅ Reason field scored on quality | ❌ No reasoning required |
 
 ---
 
