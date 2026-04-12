@@ -10,174 +10,106 @@ pinned: false
 
 # 🚨 AIRS — Autonomous Incident Response Simulator
 
-**Train and evaluate AI agents on the hardest part of DevOps: real-time incident diagnosis and recovery.**
-
-AIRS is a stateful, multi-step RL environment where AI agents receive live production alerts, interpret noisy logs, diagnose root causes, and take corrective actions — just like a real Site Reliability Engineer during a 3 AM outage.
-
-> **Unlike static benchmarks, AIRS tests what actually matters: can your agent reason sequentially under pressure, or does it just guess?**
+> **Every major cloud outage starts the same way: cascading alerts, conflicting signals, and an engineer who has seconds to find the root cause.**
+>
+> AIRS turns that problem into a benchmark. Your AI agent gets the same noisy logs, degraded dashboards, and time pressure a real SRE faces at 3 AM — and has to *reason* its way to recovery.
 
 [![Live API](https://img.shields.io/badge/API-Live%20on%20HF%20Spaces-blue)](https://naveenck10-airs-env.hf.space/docs)
 [![OpenEnv](https://img.shields.io/badge/OpenEnv-Compliant-green)](https://naveenck10-airs-env.hf.space)
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED)](https://naveenck10-airs-env.hf.space)
-[![Phase 1](https://img.shields.io/badge/Phase%201-Passed-brightgreen)]()
-[![Phase 2](https://img.shields.io/badge/Phase%202-Passed-brightgreen)]()
+[![Phase 1 ✅](https://img.shields.io/badge/Phase%201-Passed-brightgreen)]()
+[![Phase 2 ✅](https://img.shields.io/badge/Phase%202-Passed-brightgreen)]()
 
 ---
 
-## ⚡ See It In Action (30 Seconds)
+## ⚡ What AIRS Does
 
-**Your agent receives this alert:**
-
-```
-🚨 Alert: "High latency detected"
-📋 Logs:  ["DB connection timeout", "Retry failed"]
-🖥️ Status: { api: "degraded", database: "down", cache: "healthy" }
-```
-
-**Agent reasons and acts:**
-
-```json
-{
-  "diagnosis": "database_failure",
-  "action": "restart_database",
-  "reason": "Database is down causing cascading API degradation"
-}
-```
-
-**Environment responds:**
-
-```json
-{
-  "observation": {
-    "system_status": { "api": "healthy", "database": "healthy", "cache": "healthy" },
-    "step": 1
-  },
-  "reward": 0.95,
-  "done": true,
-  "info": { "effects": ["Database recovered"], "resolved": true }
-}
-```
-
-✅ System recovered. Agent scored **0.95** in one step.
-
-> This is multi-step reasoning under realistic conditions — not pattern matching.
+- 🔍 **Diagnoses failures** — Agent receives production alerts, parses noisy logs, identifies root cause
+- 🛠️ **Takes corrective actions** — Restarts services, scales infrastructure, resolves cascading issues
+- 📊 **Scores decisions** — Multi-factor reward evaluating diagnosis accuracy, action correctness, reasoning quality, and efficiency
+- 🔄 **Simulates realistic state** — Actions mutate live system state; wrong fixes make things worse
+- 🎯 **Scales difficulty** — From obvious single failures to ambiguous cascading outages
 
 ---
 
-## 🔥 Why AIRS Matters
+## 🚀 Why This Matters
 
-Every major cloud outage — AWS, Google, Azure — involves cascading failures where multiple systems degrade simultaneously. Human SREs must triage noisy signals, identify root causes, and take precise corrective actions under time pressure.
+Production incident response is one of the **hardest real-world reasoning problems** in software engineering. Today's SRE teams handle it manually. Tomorrow, AI agents will need to.
 
-**AIRS brings this challenge to AI agents.**
-
-| Real SRE Problem | How AIRS Tests It |
-|---|---|
-| Noisy, ambiguous logs | Agents must parse conflicting signals |
-| Cascading failures | Multiple services degrade — which is the root cause? |
-| Action consequences | Wrong fix makes things worse (penalties applied) |
-| Time pressure | Fewer steps = higher reward (efficiency bonus) |
-| Explainability | Agents must provide reasoning, not just answers |
-
-Most AI benchmarks test **what** the agent knows. AIRS tests **how** it thinks.
-
----
-
-## 🧠 Why AIRS Is Unique
-
-| Feature | AIRS | Typical Benchmark |
+| Problem | Why Existing Benchmarks Fail | How AIRS Solves It |
 |---|---|---|
-| **Stateful simulation** | ✅ Actions change system state | ❌ Static input/output |
-| **Multi-step episodes** | ✅ Up to 5 steps per incident | ❌ Single prediction |
-| **Partial credit** | ✅ Rewards diagnosis, action, and reasoning separately | ❌ Binary correct/wrong |
-| **Penalties** | ✅ Bad actions and late failures are penalized | ❌ No consequence for errors |
-| **Difficulty ladder** | ✅ Easy → Medium → Hard with increasing ambiguity | ❌ Flat difficulty |
-| **Deterministic grader** | ✅ Reproducible scores, external evaluator | ❌ Subjective evaluation |
-| **Explainable decisions** | ✅ Reason field scored on quality | ❌ No reasoning required |
+| Incidents are **stateful** | Static benchmarks use single input → output | AIRS actions change system state across steps |
+| Diagnosis requires **causal reasoning** | Pattern matching isn't enough | Medium/hard tasks have ambiguous, conflicting signals |
+| Wrong actions have **consequences** | No penalty for bad answers | AIRS penalizes incorrect actions and late failures |
+| Reasoning must be **explainable** | Only final answer matters | AIRS scores the quality of agent explanations |
+
+**If you're building AI agents for DevOps, SRE automation, or incident response — this is the evaluation environment you need.**
 
 ---
 
-## 🌍 Real-World Use Cases
+## 🧩 Task Design — Three Modes of Reasoning
 
-- **AI SRE Agents** — Train LLM-based agents to handle production incidents autonomously
-- **DevOps Automation** — Benchmark automated remediation systems before deploying to prod
-- **Incident Response Training** — Simulate realistic outage scenarios for engineering teams
-- **LLM Evaluation** — Test whether language models can reason sequentially, not just retrieve
-- **RL Research** — Multi-step decision environments with sparse, multi-factor rewards
+Each difficulty level tests a fundamentally different cognitive challenge:
 
----
+### 🟢 Easy — Direct Signal Mapping (4 incidents)
+> *"One service is down. The logs say exactly why."*
 
-## 🏗️ Architecture
+Single point of failure with clear log evidence. Tests whether the agent can read signals and act decisively. Expected: **1 step**.
 
-```
-Agent → POST /step { diagnosis, action, reason }
-                      │
-              ┌───────▼────────┐
-              │  FastAPI Layer  │  api/main.py
-              └───────┬────────┘
-                      │
-              ┌───────▼────────┐
-              │    AIRSEnv     │  core/environment.py
-              │  (Stateful)    │
-              └───────┬────────┘
-                      │
-              ┌───────▼────────┐
-              │ SystemSimulator│  core/simulator.py
-              │  (State Machine)│
-              └───────┬────────┘
-                      │
-              ┌───────▼────────┐
-              │  Reward Engine │  Multi-factor scoring
-              └───────┬────────┘
-                      │
-              ▼ Returns: Observation + Reward + Done + Info
+**Example:** `"DB connection timeout"` + database status `"down"` → restart database.
 
+### 🟡 Medium — Conflicting Signals (4 incidents)
+> *"Multiple services look unhealthy. The logs point in different directions."*
 
- Dataset:   data/incidents_v1.json  (10 incidents × 3 difficulty levels)
- Grader:    evaluation/grader.py    (deterministic, mirrors environment)
- Baseline:  inference.py            (heuristic + LiteLLM proxy)
-```
+Ambiguous log entries with mixed status signals. Tests whether the agent can distinguish **root cause from symptoms**. Expected: **2 steps**.
+
+**Example:** `"Cache miss rate high"` + `"DB query latency elevated"` — is this a database problem or a cache problem? The agent must reason through the dependency chain.
+
+### 🔴 Hard — Cascading Failure Analysis (2 incidents)
+> *"Everything is on fire. Which domino fell first?"*
+
+All services degraded simultaneously. Logs show failures across every component. Tests whether the agent can perform **causal reasoning** to identify the origin failure that triggered the cascade. Expected: **3 steps**.
+
+**Example:** API down + database slow + cache overloaded — the agent must identify that cache overload is the root cause, not just the loudest alert.
 
 ---
 
-## ⚙️ Environment Flow
+## 🧠 Reasoning Evaluation
 
-```
-1. POST /reset  →  Start incident episode
-                    Returns: alert, logs, system_status
+AIRS doesn't just check answers — it evaluates **how the agent thinks**.
 
-2. POST /step   →  Agent takes action
-                    Returns: updated observation, reward, done, info
+### Multi-Factor Scoring (6 Components)
 
-3. Repeat        →  Until system resolved or max steps (5) reached
+| Factor | Weight | What It Measures |
+|---|---|---|
+| Correct diagnosis | **0.35** | Did the agent identify the root cause? |
+| Correct action | **0.40** | Did it take the right remediation step? |
+| Reasoning quality | **0.15** | Is the explanation substantive (>5 words)? |
+| Efficiency bonus | **0.05** | Solved in ≤2 steps? |
+| Bad action penalty | **−0.30** | Penalizes `do_nothing`, `ignore`, `random_action` |
+| Late failure penalty | **−0.10** | Wrong action after step 3 |
 
-4. Score         →  reward ∈ [0.0, 1.0] based on 6 scoring factors
-```
+> **Current approach:** Structured keyword-based validation ensures deterministic, reproducible scores. The reasoning evaluation serves as a baseline — designed to be extended with semantic similarity scoring and LLM-as-judge evaluation for richer assessment of agent explanations.
 
 ---
 
-## 🧪 Full Example Interaction
+## 🧪 Example Interaction
 
-### Step 1 — Reset
+**1. Start an incident:**
 
 ```bash
 curl -X POST https://naveenck10-airs-env.hf.space/reset
 ```
-
-**Response:**
 
 ```json
 {
   "incident_id": "INC100",
   "alert": "High latency detected",
   "logs": ["DB connection timeout", "Retry failed"],
-  "system_status": { "api": "degraded", "database": "down", "cache": "healthy" },
-  "step": 0,
-  "version": "1.0",
-  "hint": "Look for patterns like timeouts, crashes, or overload signals in logs"
+  "system_status": { "api": "degraded", "database": "down", "cache": "healthy" }
 }
 ```
 
-### Step 2 — Agent Acts
+**2. Agent reasons and acts:**
 
 ```bash
 curl -X POST https://naveenck10-airs-env.hf.space/step \
@@ -185,117 +117,85 @@ curl -X POST https://naveenck10-airs-env.hf.space/step \
   -d '{
     "diagnosis": "database_failure",
     "action": "restart_database",
-    "reason": "DB connection timeout in logs + database status is down, causing cascading API degradation"
+    "reason": "DB connection timeout in logs + database is down → root cause is database failure"
   }'
 ```
 
-**Response:**
+**3. Environment responds:**
 
 ```json
 {
-  "observation": {
-    "incident_id": "INC100",
-    "system_status": { "api": "healthy", "database": "healthy", "cache": "healthy" },
-    "step": 1
-  },
   "reward": 0.95,
   "done": true,
-  "info": {
-    "effects": ["Database recovered"],
-    "resolved": true,
-    "steps_taken": 1
-  }
+  "info": { "effects": ["Database recovered"], "resolved": true }
 }
 ```
 
-### Reward Breakdown
-
-| Factor | Weight | This Score |
-|---|---|---|
-| Correct diagnosis | 0.35 | ✅ 0.35 |
-| Correct action | 0.40 | ✅ 0.40 |
-| Quality reasoning (>5 words) | 0.15 | ✅ 0.15 |
-| Efficiency bonus (≤2 steps) | 0.05 | ✅ 0.05 |
-| **Total** | **1.00** | **0.95** |
+✅ **System recovered in 1 step. Score: 0.95/1.00.**
 
 ---
 
-## 🎯 Task Design
+## 🏗️ Architecture
 
-| Level | Incidents | What Makes It Hard | Expected Steps |
-|---|---|---|---|
-| **Easy** | 4 | Single-service failure with clear log signals | 1 |
-| **Medium** | 4 | Ambiguous logs, mixed signals across services | 2 |
-| **Hard** | 2 | All services degraded — agent must find root cause in cascading failure | 3 |
-
-```bash
-curl https://naveenck10-airs-env.hf.space/tasks
+```
+ Agent ─── POST /step ──▶ ┌─────────────────┐
+                          │   FastAPI Layer  │  ◀── POST /reset, GET /state
+                          └────────┬────────┘
+                                   │
+                          ┌────────▼────────┐
+                          │    AIRSEnv       │  Stateful episode manager
+                          └────────┬────────┘
+                                   │
+                     ┌─────────────┼─────────────┐
+                     ▼             ▼              ▼
+              SystemSimulator  Reward Engine   Grader
+              (state machine)  (6 factors)    (deterministic)
 ```
 
----
-
-## 🧾 Action & Observation Space
-
-### Action (POST /step)
-
-| Field | Type | Description |
+| Component | File | Role |
 |---|---|---|
-| `diagnosis` | string | Root cause prediction (e.g., `database_failure`) |
-| `action` | string | Remediation action to take |
-| `reason` | string | Explanation for the decision |
-
-**Valid Actions:** `restart_database` · `restart_api` · `scale_cache` · `restart_service`
-
-### Observation (returned by /reset and /step)
-
-| Field | Type | Description |
-|---|---|---|
-| `incident_id` | string | Unique incident identifier |
-| `alert` | string | Alert message |
-| `logs` | list[str] | Noisy log entries |
-| `system_status` | dict | Current health of each service |
-| `step` | int | Current step number |
-| `version` | string | Environment version |
-| `hint` | string | Optional guidance |
+| API Layer | `api/main.py` | FastAPI endpoints (reset, step, state, tasks, grader, baseline) |
+| Environment | `core/environment.py` | Stateful episode lifecycle + reward computation |
+| Simulator | `core/simulator.py` | System state machine — actions mutate service health |
+| Grader | `evaluation/grader.py` | Deterministic external scoring (mirrors environment logic) |
+| Incidents | `data/incidents_v1.json` | 10 curated scenarios across 3 difficulty levels |
+| Inference | `inference.py` | LiteLLM proxy client + heuristic fallback |
 
 ---
 
 ## 📊 Baseline Performance
 
-| Difficulty | Heuristic Score | Room for Improvement |
-|---|---|---|
-| Easy | **0.95** | Near-optimal |
-| Medium | **0.15** | 85% gap — ambiguous signals trip the heuristic |
-| Hard | **0.15** | 85% gap — cascading failures need causal reasoning |
-| **Average** | **0.42** | **Significant room for LLM/RL agents to beat** |
+| Difficulty | Baseline Score | Headroom | What's Missing |
+|---|---|---|---|
+| 🟢 Easy | **0.95** | 5% | Near-optimal — clear signals |
+| 🟡 Medium | **0.15** | **85%** | Heuristic can't resolve ambiguous signals |
+| 🔴 Hard | **0.15** | **85%** | Cascading failures require causal reasoning |
+| **Average** | **0.42** | **58%** | **Massive room for intelligent agents** |
 
-> The baseline uses keyword heuristics. An agent with real reasoning ability should dramatically outperform it on medium and hard tasks.
-
----
-
-## 🔌 API Reference
-
-| Endpoint | Method | Purpose |
-|---|---|---|
-| `/reset` | GET / POST | Start new incident episode |
-| `/step` | POST | Submit agent action |
-| `/state` | GET | Current environment state |
-| `/tasks` | GET | List difficulty levels |
-| `/grader` | POST | Deterministic external scoring |
-| `/baseline` | GET | Baseline performance scores |
-
-**Live API Docs:** [https://naveenck10-airs-env.hf.space/docs](https://naveenck10-airs-env.hf.space/docs)
+> The baseline uses simple keyword matching. It solves easy cases but **completely fails** when signals conflict or cascade — exactly the gap that LLM and RL agents should close.
 
 ---
 
-## 💻 Quick Start
+## 🌍 Use Cases
+
+| Domain | Application |
+|---|---|
+| **AI SRE Agents** | Train and evaluate LLM-based agents for autonomous incident response |
+| **DevOps Automation** | Benchmark automated remediation pipelines before production deployment |
+| **Incident Response Training** | Simulate realistic outage scenarios for on-call engineering teams |
+| **LLM Evaluation** | Test sequential reasoning and causal analysis capabilities |
+| **RL Research** | Multi-step decision environment with sparse, multi-factor reward signals |
+
+---
+
+## ⚙️ Quick Start
 
 ### Local
 
 ```bash
 pip install -r requirements.txt
 uvicorn api.main:app --reload
-# Open http://127.0.0.1:8000/docs
+# → http://127.0.0.1:8000/docs
 ```
 
 ### Docker
@@ -303,15 +203,29 @@ uvicorn api.main:app --reload
 ```bash
 docker build -t airs-env .
 docker run -p 7860:7860 airs-env
-# Open http://127.0.0.1:7860/docs
+# → http://127.0.0.1:7860/docs
 ```
+
+---
+
+## 🔌 API Reference
+
+| Endpoint | Method | Purpose |
+|---|---|---|
+| `/reset` | GET / POST | Start a new incident episode |
+| `/step` | POST | Submit diagnosis + action + reasoning |
+| `/state` | GET | Current environment state |
+| `/tasks` | GET | List available difficulty levels |
+| `/grader` | POST | Deterministic external scoring |
+| `/baseline` | GET | Baseline heuristic performance |
+
+📖 **[Interactive API Docs →](https://naveenck10-airs-env.hf.space/docs)**
 
 ---
 
 ## 🧩 OpenEnv Configuration
 
 ```yaml
-# openenv.yaml
 name: airs-env
 version: 1.0.0
 entrypoint:
@@ -333,35 +247,26 @@ endpoints:
 airs-env/
 ├── api/main.py              # FastAPI endpoints
 ├── core/
-│   ├── environment.py       # Stateful AIRSEnv (reset/step/reward)
+│   ├── environment.py       # Stateful AIRSEnv (reset / step / reward)
 │   └── simulator.py         # System state machine
 ├── evaluation/grader.py     # Deterministic external grader
 ├── baseline/run.py          # Heuristic baseline runner
-├── data/incidents_v1.json   # 10 incident scenarios
-├── inference.py             # LiteLLM proxy inference script
+├── data/incidents_v1.json   # 10 incident scenarios (3 difficulty levels)
+├── inference.py             # LiteLLM proxy inference + heuristic fallback
 ├── models.py                # Pydantic schemas
-├── tasks.py                 # Task definitions
-├── openenv.yaml             # OpenEnv spec
+├── tasks.py                 # Task definitions (easy / medium / hard)
+├── openenv.yaml             # OpenEnv specification
 ├── Dockerfile               # Production container
 ├── requirements.txt         # Dependencies
-└── pyproject.toml           # Package config
+└── pyproject.toml           # Package configuration
 ```
-
----
-
-## ⚠️ Limitations & Future Work
-
-- Baseline uses keyword heuristics — an RL/LLM agent would significantly outperform it
-- Current dataset covers database, API, and cache failures — extensible to more service types
-- Future: add network partition, memory leak, and disk pressure scenarios
-- Future: support multi-agent coordination for complex outages
 
 ---
 
 ## 🏆 Summary
 
-AIRS is a **production-grade OpenEnv environment** that challenges AI agents with the same problems real SRE teams face every day: noisy logs, cascading failures, and time-critical decisions.
+AIRS is a **production-grade OpenEnv environment** that challenges AI agents with the same problems real SRE teams face: noisy logs, cascading failures, and time-critical decisions.
 
 It's not a toy benchmark — it's a structured evaluation of **sequential reasoning, causal diagnosis, and explainable action** under realistic conditions.
 
-**Passed Phase 1 ✅ | Passed Phase 2 ✅ | Live on HF Spaces ✅ | Deterministic ✅**
+**Phase 1 ✅ · Phase 2 ✅ · Live on HF Spaces ✅ · Deterministic Scoring ✅**
